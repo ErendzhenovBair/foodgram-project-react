@@ -23,6 +23,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'recipes',
+    'users',
+    'api',
+    'djoser',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -107,6 +111,8 @@ USE_L10N = True
 
 USE_TZ = True
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
@@ -126,3 +132,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
 }
+
+APP_PREFIX = 'api'
+
+MIN_COOK_TIME = 1
