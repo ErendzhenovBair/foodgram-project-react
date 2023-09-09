@@ -11,3 +11,15 @@ class IsAuthorOrReadOnly(BasePermission):
         return (request.method in SAFE_METHODS
                 or obj.author == request.user
                 or obj.author.is_admin)
+
+
+class RecipePermission(BasePermission):
+    def has_permission(self, request, view):
+        return (request.method in SAFE_METHODS
+                or request.user.is_authenticated)
+
+    def has_object_permission(self, request, view, obj):
+        return (request.method in ['DELETE', 'PATCH', ]
+                and request.user.is_user
+                and request.user != obj.author
+                or request.user.is_admin)

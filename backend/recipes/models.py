@@ -1,10 +1,11 @@
+from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
-from users.models import User
-
 from foodgram.settings import MIN_COOK_TIME
+
+User = get_user_model()
 
 
 class Ingredient(models.Model):
@@ -57,9 +58,15 @@ class Tag(models.Model):
 
 class Recipe(models.Model):
     """Recipe model."""
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='recipes',
+        verbose_name='Author',
+    )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through='IngredientsList',
+        through='IngredientsAmount',
         related_name='recipes',
         verbose_name='Ingredients',
     )
@@ -107,17 +114,15 @@ class Recipe(models.Model):
 
 class Favourite(models.Model):
     """Favorite model."""
-    user = models.ForeignKey(
+    who_favourited = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favorite',
-        verbose_name='Recipe',
+        related_name='who_favourited',
     )
-    recipe = models.ForeignKey(
+    favourited_recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favorite',
-        verbose_name='User added to favorites',
+        related_name='is_favourited',
     )
 
     class Meta:
@@ -125,24 +130,25 @@ class Favourite(models.Model):
         verbose_name_plural = 'Favourites'
 
 
-class IngredientsList(models.Model):
+class IngredientsAmount(models.Model):
     """Ingredients list model."""
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='ingredients_list',
+        related_name='ingredients_amount',
         verbose_name='Recipe',
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='ingredients_list',
+        related_name='ingredients_amount',
         verbose_name='Ingredient',
     )
     amount = models.IntegerField(verbose_name='Amount')
 
     class Meta:
-        verbose_name = 'Ingredients list'
+        verbose_name = 'Ingredients amount'
+        verbose_name_plural = 'Ingredients amount'
 
     def __str__(self):
         return f'{self.ingredient}: {self.amount}'
@@ -150,7 +156,7 @@ class IngredientsList(models.Model):
 
 class ShoppingCart(models.Model):
     """Shopping Cart model."""
-    recipe = models.ForeignKey(
+    recipe_in_cart = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='shopping_cart',
@@ -166,7 +172,7 @@ class ShoppingCart(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['user', 'recipe'], name='unique_shopping_cart'
+                fields=['user', 'recipe_in_cart'], name='unique_shopping_cart'
             )
         ]
         verbose_name = 'Shopping Cart'

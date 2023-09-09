@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import display
 
-from .models import (Favourite, Ingredient, IngredientsList, Recipe,
+from .models import (Favourite, Ingredient, IngredientsAmount, Recipe,
                      ShoppingCart, Tag)
 
 
@@ -11,9 +11,9 @@ class RecipeAdmin(admin.ModelAdmin):
     readonly_fields = ('added_in_favorites',)
     list_filter = ('author', 'name', 'tags',)
 
-    @staticmethod
-    def added_to_favorite(obj):
-        return obj.favorite.count()
+    @display
+    def added_in_favorites(self, obj):
+        return obj.is_favourited.count()
 
 
 @admin.register(Ingredient)
@@ -29,14 +29,14 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Favourite)
 class FavouriteAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipe',)
+    list_display = ('who_favourited', 'favourited_recipe',)
 
 
-@admin.register(IngredientsList)
-class IngredientsListADmin(admin.ModelAdmin):
+@admin.register(IngredientsAmount)
+class IngredientsAmountADmin(admin.ModelAdmin):
     list_display = ('recipe', 'ingredient', 'amount',)
 
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipe',)
+    list_display = ('user', 'recipe_in_cart',)
