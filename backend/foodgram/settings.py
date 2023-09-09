@@ -26,8 +26,8 @@ INSTALLED_APPS = [
     'recipes',
     'users',
     'api',
-    'djoser',
     'django_filters',
+    'djoser',
 ]
 
 MIDDLEWARE = [
@@ -41,6 +41,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+ROOT_URLCONF = 'foodgram.urls'
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -48,8 +50,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 6,
+    "DEFAULT_PAGINATION_CLASS": "api.pagination.CustomPagination",
 }
 
 DJOSER = {
@@ -57,8 +58,7 @@ DJOSER = {
     'HIDE_USERS': False,
     'SERIALIZERS': {
         'user_create': 'users.serializers.CustomUserCreateSerializer',
-        'user': 'api.serializers.CustomUserSerializer',
-        'current_user': 'api.serializers.CustomUserSerializer',
+        'user': 'users.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.AllowAny'],
@@ -71,8 +71,6 @@ INTERNAL_IPS = [
     '127.0.0.1:8080', ]
 
 AUTH_USER_MODEL = 'users.User'
-
-ROOT_URLCONF = 'foodgram.urls'
 
 TEMPLATES = [
     {
@@ -89,6 +87,31 @@ TEMPLATES = [
         },
     },
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'default': {
+            'format': '[DJANGO] %(levelname)s %(asctime)s %(module)s '
+                      '%(name)s.%(funcName)s:%(lineno)s: %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'default',
+        }
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
+    },
+}
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 

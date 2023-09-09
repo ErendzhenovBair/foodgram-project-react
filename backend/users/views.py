@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.permissions import IsAuthorOrReadOnly
+from api.permissions import IsAuthorOrAdminReadOnly
 from users.models import Subscription
 from users.serializers import (
     CustomUserSerializer, CustomUserCreateSerializer,
@@ -65,7 +65,7 @@ class CustomUserViewSet(
     @action(
         detail=True,
         methods=['POST'],
-        permission_classes=[IsAuthorOrReadOnly, ]
+        permission_classes=[IsAuthorOrAdminReadOnly, ]
     )
     def subscribe(self, request, pk):
         user = request.user

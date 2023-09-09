@@ -9,14 +9,14 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from .pagination import CustomPagination
-from .permissions import IsAuthorOrReadOnly, RecipePermission
+from .permissions import IsAuthorOrAdminReadOnly, RecipePermission
 from recipes.models import (Favourite, Ingredient, Recipe,
                             ShoppingCart, Tag)
 from .filters import IngredientFilter
 from .serializers import (
     FavouriteSerializer, IngredientSerializer,
-    ShoppingCartSerializer, RecipeSerializer,
-    TagSerializer)
+    RecipeLightSerializer, RecipeWriteSerializer,
+    RecipeSerializer, ShoppingCartSerializer, TagSerializer)
 
 User = get_user_model()
 
@@ -52,11 +52,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     # filterset_class = RecipeFilter
-    permission_classes = [IsAuthorOrReadOnly, ]
+    permission_classes = [IsAuthorOrAdminReadOnly, ]
     ordering = ['-pub_date']
 
-    def get_serializer_context(self):
-        return {'user': self.request.user}
+    def get_serializer_class(self):
+        if self.action in ('favourite', 'shopping_cart'):
+            return RecipeLightSerializer
+        if self.action in ('create', 'partial_update'):
+            return RecipeWriteSerializer
+        return RecipeSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(
