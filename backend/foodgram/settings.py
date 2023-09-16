@@ -11,7 +11,7 @@ SECRET_KEY = 'django-insecure-yaktm$t0!b(f_oq645q=ho*sdn+9ynyf^fl3yfx@-&sv^n(kd_
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "*"]
+ALLOWED_HOSTS = ["158.160.76.225", "localhost", "127.0.0.1", 'myfoodgram790.hopto.org']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -23,11 +23,11 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'rest_framework',
     'rest_framework.authtoken',
+    'djoser',
+    'django_filters',
     'recipes',
     'users',
     'api',
-    'django_filters',
-    'djoser',
 ]
 
 MIDDLEWARE = [
@@ -50,18 +50,20 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
-    "DEFAULT_PAGINATION_CLASS": "api.pagination.CustomPagination",
+    "DEFAULT_PAGINATION_CLASS": 'rest_framework.pagination.PageNumberPagination',
+    "PAGE_SIZE": 6,
 }
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        'user_create': 'users.serializers.CustomUserCreateSerializer',
         'user': 'users.serializers.CustomUserSerializer',
+        'user_create': 'users.serializers.CustomUserCreateSerializer',
+        'current_user': 'users.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
-        'user': ['rest_framework.permissions.AllowAny'],
+        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
         'user_list': ['rest_framework.permissions.AllowAny'],
     }
 }
@@ -121,19 +123,19 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-        'HOST': 'localhost',
-        'PORT': os.getenv('DB_PORT', 5432),
-    },
-    'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
 }
 
+# 'default': {
+#    'ENGINE': 'django.db.backends.postgresql',
+#   'NAME': os.getenv('POSTGRES_DB'),
+#    'USER': os.getenv('POSTGRES_USER'),
+#   'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+#    'HOST': 'localhost',
+#    'PORT': os.getenv('DB_PORT', 5432),
+# },
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -167,14 +169,14 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATIC_URL = '/static/'
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 APP_PREFIX = 'api'
 

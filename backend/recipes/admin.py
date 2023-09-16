@@ -13,7 +13,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @display
     def added_in_favorites(self, obj):
-        return obj.is_favourited.count()
+        return obj.favourites.count()
 
 
 @admin.register(Ingredient)
@@ -39,4 +39,4 @@ class IngredientsAmountADmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipe_in_cart',)
+    list_display = ('user', 'recipe',)

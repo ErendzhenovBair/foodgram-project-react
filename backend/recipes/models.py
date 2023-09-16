@@ -13,7 +13,8 @@ class Ingredient(models.Model):
     name = models.CharField(
         blank=False,
         max_length=200,
-        verbose_name='Name',
+        verbose_name='Ingredients Name',
+        db_index=True
     )
     measurement_unit = models.CharField(
         blank=False,
@@ -117,17 +118,24 @@ class Favourite(models.Model):
     who_favourited = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='who_favourited',
+        related_name='favourites',
     )
     favourited_recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='is_favourited',
+        related_name='favourites',
     )
 
     class Meta:
         verbose_name = 'Favourite'
         verbose_name_plural = 'Favourites'
+        ordering = ('id',)
+        constraints = (
+            models.UniqueConstraint(
+                fields=['who_favourited', 'favourited_recipe'],
+                name='unique_favourites'
+            ),
+        )
 
 
 class IngredientsAmount(models.Model):
@@ -135,20 +143,24 @@ class IngredientsAmount(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='ingredients_amount',
         verbose_name='Recipe',
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='ingredients_amount',
         verbose_name='Ingredient',
     )
-    amount = models.IntegerField(verbose_name='Amount')
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='quantity',
+        default=1,
+        validators=[MinValueValidator(1, 'the weight cannot be less than 1')])
 
     class Meta:
         verbose_name = 'Ingredients amount'
-        verbose_name_plural = 'Ingredients amount'
+        constraints = [
+            models.UniqueConstraint(fields=['ingredient', 'recipe'],
+                                    name='unique_recipe_ingredient')
+        ]
 
     def __str__(self):
         return f'{self.ingredient}: {self.amount}'
@@ -156,7 +168,7 @@ class IngredientsAmount(models.Model):
 
 class ShoppingCart(models.Model):
     """Shopping Cart model."""
-    recipe_in_cart = models.ForeignKey(
+    recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='shopping_cart',
@@ -172,7 +184,7 @@ class ShoppingCart(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['user', 'recipe_in_cart'], name='unique_shopping_cart'
+                fields=['user', 'recipe'], name='unique_shopping_cart'
             )
         ]
         verbose_name = 'Shopping Cart'

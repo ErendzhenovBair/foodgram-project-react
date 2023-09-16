@@ -5,35 +5,25 @@ SUBSCRIPTION_MESSAGE = "{subcriber} subscribed on {subscribing}"
 
 
 class User(AbstractUser):
-    USER: str = 'user'
-    ADMIN: str = 'admin'
-    CHOICES = (
-        (USER, 'user'),
-        (ADMIN, 'admin'),
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = [
+        'username',
+        'first_name',
+        'last_name',
+    ]
+    email = models.EmailField(
+        'email',
+        max_length=254,
+        unique=True,
     )
-    role = models.CharField(choices=CHOICES,
-                            default='user',
-                            max_length=128)
 
     class Meta:
         ordering = ['id']
         verbose_name = 'User'
         verbose_name_plural = 'Users'
-        constraints = [
-            models.UniqueConstraint(fields=['username', 'email'],
-                                    name='unique_user')
-        ]
 
     def __str__(self):
         return self.username
-
-    @property
-    def is_user(self):
-        return self.role == self.USER
-
-    @property
-    def is_admin(self):
-        return self.role == self.ADMIN
 
 
 class Subscription(models.Model):
