@@ -29,7 +29,7 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Favourite)
 class FavouriteAdmin(admin.ModelAdmin):
-    list_display = ('who_favourited', 'favourited_recipe',)
+    list_display = ('user', 'recipe',)
 
 
 @admin.register(IngredientsAmount)

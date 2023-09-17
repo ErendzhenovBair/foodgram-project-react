@@ -83,7 +83,7 @@ class RecipeGETSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
     ingredients = IngredientFullSerializer(many=True)
-    is_favourited = serializers.SerializerMethodField(read_only=True)
+    is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -93,7 +93,7 @@ class RecipeGETSerializer(serializers.ModelSerializer):
             'tags',
             'author',
             'ingredients',
-            'is_favourited',
+            'is_favorited',
             'is_in_shopping_cart',
             'name',
             'image',
@@ -101,13 +101,11 @@ class RecipeGETSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
-    def get_is_favourited(self, object):
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
+    def get_is_favorited(self, recipe):
+        user = self.context.get('request').user
+        if user.is_anonymous:
             return False
-        return request.user.favourites.filter(
-            favourited_recipe=object
-        ).exists()
+        return user.who_favourited.filter(recipe=recipe).exists()
 
     def get_is_in_shopping_cart(self, object):
         request = self.context.get('request')
@@ -164,7 +162,6 @@ class RecipeSerializer(ModelSerializer):
             )
         return tags
 
-
     @transaction.atomic
     def create_ingredients_amounts(self, ingredients, recipe):
         IngredientsAmount.objects.bulk_create(
@@ -174,7 +171,6 @@ class RecipeSerializer(ModelSerializer):
                 amount=ingredient['amount']
             ) for ingredient in ingredients]
         )
-
 
     @transaction.atomic
     def create(self, validated_data):
@@ -193,7 +189,8 @@ class RecipeSerializer(ModelSerializer):
         instance.tags.clear()
         instance.tags.set(tags)
         instance.ingredients.clear()
-        self.create_ingredients_amounts(recipe=instance, ingredients=ingredients)
+        self.create_ingredients_amounts(
+            recipe=instance, ingredients=ingredients)
         instance.save()
         return instance
 
@@ -210,20 +207,6 @@ class RecipeLightSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'image',
             'cooking_time'
-        ]
-
-
-class FavouriteSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Favourite
-        fields = '__all__'
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Favourite.objects.all(),
-                fields=('who_favourited', 'favourited_recipe'),
-                message='Have you already added this recipe to your favorites'
-            )
         ]
 
 

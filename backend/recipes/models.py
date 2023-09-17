@@ -114,13 +114,13 @@ class Recipe(models.Model):
 
 
 class Favourite(models.Model):
-    """Favorite model."""
-    who_favourited = models.ForeignKey(
+    """Favourite model."""
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favourites',
+        related_name='who_favourited',
     )
-    favourited_recipe = models.ForeignKey(
+    recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='favourites',
@@ -132,7 +132,7 @@ class Favourite(models.Model):
         ordering = ('id',)
         constraints = (
             models.UniqueConstraint(
-                fields=['who_favourited', 'favourited_recipe'],
+                fields=['user', 'recipe'],
                 name='unique_favourites'
             ),
         )

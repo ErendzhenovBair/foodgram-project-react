@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import permissions, status, viewsets
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -14,9 +14,9 @@ from recipes.models import (
     Recipe, ShoppingCart, Tag
 )
 from .filters import IngredientFilter, RecipeFilter
+from .permissions import RecipePermission
 from .serializers import (
-    FavouriteSerializer, IngredientSerializer,
-    RecipeLightSerializer, RecipeGETSerializer,
+    IngredientSerializer, RecipeLightSerializer, RecipeGETSerializer,
     RecipeSerializer, ShoppingCartSerializer, TagSerializer)
 from .utils import create_shopping_cart
 
@@ -49,6 +49,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
+    def add_to(self, model, user, pk):
+        if model.objects.filter(user=user, recipe__id=pk).exists():
+            return Response(
+                {'errors': 'The recipe has already been added!'},
+                status=status.HTTP_400_BAD_REQUEST)
+        recipe = get_object_or_404(Recipe, id=pk)
+        model.objects.create(user=user, recipe=recipe)
+        serializer = RecipeLightSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete_from(self, model, user, pk):
+        obj = model.objects.filter(user=user, recipe__id=pk)
+        if obj.exists():
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'errors': 'The recipe has already been deleted!'},
+            status=status.HTTP_400_BAD_REQUEST)
+
     @action(
         detail=True,
         methods=['post', 'delete'],
@@ -56,23 +75,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='favorite',
         permission_classes=(permissions.IsAuthenticated,)
     )
-    def get_favorite(self, request, pk):
-        recipe = get_object_or_404(Recipe, pk=pk)
+    def favorite(self, request, pk):
         if request.method == 'POST':
-            serializer = FavouriteSerializer(
-                data={'who_favourited': request.user.id, 'favourited_recipe': recipe}
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            favourite_serializer = RecipeLightSerializer(recipe)
-            return Response(
-                favourite_serializer.data, status=status.HTTP_201_CREATED
-            )
-        favorited_recipe = get_object_or_404(
-            Favourite, who_favourited=request.user, favourited_recipe=recipe
-        )
-        favorited_recipe.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+            return self.add_to(Favourite, request.user, pk)
+        else:
+            return self.delete_from(Favourite, request.user, pk)
 
     @action(
         detail=True,
