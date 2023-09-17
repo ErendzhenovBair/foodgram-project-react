@@ -2,9 +2,10 @@ import logging
 
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.validators import UniqueTogetherValidator
 
+from foodgram.settings import RECIPES_LIMIT
 from recipes.models import Recipe
 from users.models import Subscription
 
@@ -52,20 +53,25 @@ class CustomUserSerializer(UserSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
-    """Subscrtion model Serializer."""
+
     class Meta:
         model = Subscription
-        fields = '__all__'
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Subscription.objects.all(),
-                fields=('user', 'author'),
-                message='You have already subscribed to this author!'
-            )
-        ]
+        fields = ['user', 'author']
+        read_only_fields = ('email', 'username')
+        extra_kwargs = {
+            'user': {'required': False},
+            'author': {'required': False},
+        }
 
     def validate(self, data):
-        if data['user'] == data['author']:
+        author = self.instance
+        user = self.context.get('request').user
+        if Subscription.objects.filter(author=author, user=user).exists():
+            raise serializers.ValidationError(
+                detail='You have already subscribed to this user!',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        if user == author:
             raise serializers.ValidationError(
                 'You cannot subscribe to yourself!'
             )
@@ -73,10 +79,11 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionRecipeShortSerializer(serializers.ModelSerializer):
-    """Subscrtion model (for displaying recipes in subscription) Serializer."""
+
     class Meta:
         model = Recipe
         fields = (
+            'id',
             'name',
             'image',
             'cooking_time'
@@ -84,11 +91,11 @@ class SubscriptionRecipeShortSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionShowSerializer(CustomUserSerializer):
-    """"Subscription Display Sterilizer."""
+    """"Subscription Model Serializer."""
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
-    class Meta:
+    class Meta(CustomUserSerializer.Meta):
         model = User
         fields = (
             'email',
@@ -101,8 +108,11 @@ class SubscriptionShowSerializer(CustomUserSerializer):
             'recipes_count'
         )
 
-    def get_recipes(self, author):
-        return Recipe.objects.filter(author=author).count()
+    def get_recipes(self, object):
+        author_recipes = object.recipes.all()[:RECIPES_LIMIT]
+        return SubscriptionRecipeShortSerializer(
+            author_recipes, many=True
+        ).data
 
     def get_recipes_count(self, object):
         return object.recipes.count()

@@ -51,5 +51,4 @@ class Subscription(models.Model):
         ]
 
     def __str__(self):
-        return SUBSCRIPTION_MESSAGE.format(
-            subscriber=self.user.username, subscribing=self.author.username)
+        return f'{self.user} subscribed to: {self.author}'
