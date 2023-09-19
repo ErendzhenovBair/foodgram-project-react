@@ -12,8 +12,9 @@ from rest_framework.response import Response
 from api.pagination import CustomPagination
 from users.models import Subscription
 from users.serializers import (
-    CustomUserSerializer, CustomUserCreateSerializer,
-    SubscriptionSerializer, SubscriptionShowSerializer)
+    CustomUserSerializer,
+    SubscriptionSerializer,
+    SubscriptionShowSerializer)
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -57,9 +58,8 @@ class CustomUserViewSet(UserViewSet):
         author = get_object_or_404(User, id=author_id)
 
         if request.method == 'POST':
-            serializer = SubscriptionSerializer(author,
-                                             data=request.data,
-                                             context={"request": request})
+            serializer = SubscriptionSerializer(
+                author, data=request.data, context={"request": request})
             serializer.is_valid(raise_exception=True)
             Subscription.objects.create(user=user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)

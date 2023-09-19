@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import CustomUserViewSet
+
 from foodgram.settings import APP_PREFIX_2
 
 app_name = APP_PREFIX_2
