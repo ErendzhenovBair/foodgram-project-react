@@ -133,3 +133,5 @@ dmypy.json
 docker-compose.yml
 .venv
 .env
+.dockerignore
+.vscode

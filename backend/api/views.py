@@ -1,10 +1,12 @@
+from datetime import datetime
 import logging
 
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, permissions, status, viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -14,11 +16,9 @@ from recipes.models import (
     Recipe, ShoppingCart, Tag
 )
 from .filters import IngredientFilter, RecipeFilter
-from .permissions import RecipePermission
 from .serializers import (
     IngredientSerializer, RecipeLightSerializer, RecipeGETSerializer,
     RecipeSerializer, ShoppingCartSerializer, TagSerializer)
-from .utils import create_shopping_cart
 
 User = get_user_model()
 
@@ -92,7 +92,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, pk=pk)
         if request.method == 'POST':
             serializer = ShoppingCartSerializer(
-                data={'user': request.user.id, 'recipe': recipe}
+                data={'user': request.user.id, 'recipe': recipe.id}
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -114,17 +114,34 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(permissions.IsAuthenticated,)
     )
     def download_shopping_cart(self, request):
-        ingredients_cart = (
-            IngredientsAmount.objects.filter(
-                recipe__shopping_cart__user=request.user
-            ).values(
-                'ingredient__name',
-                'ingredient__measurement_unit',
-            ).order_by(
-                'ingredient__name'
-            ).annotate(ingredient_value=Sum('amount'))
+        user = request.user
+        if not user.shopping_cart.exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        ingredients = IngredientsAmount.objects.filter(
+            recipe__shopping_cart__user=request.user
+        ).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(amount=Sum('amount'))
+        today = datetime.today()
+        shopping_cart = (
+            f'Shopping cart for: {user.get_full_name()}\n\n'
+            f'Date: {today:%Y-%m-%d}\n\n'
         )
-        return create_shopping_cart(ingredients_cart)
+        shopping_cart += '\n'.join(
+            [
+                f'- {ingredient["ingredient__name"]} '
+                f'({ingredient["ingredient__measurement_unit"]})'
+                f' - {ingredient["amount"]}'
+                for ingredient in ingredients
+            ]
+        )
+        shopping_cart += f'\n\nFoodgram ({today:%Y})'
+
+        filename = f'{user.username}_shopping_cart.txt'
+        response = HttpResponse(shopping_cart, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        return response
 
     def get_serializer_class(self):
         if self.request.method == 'GET':

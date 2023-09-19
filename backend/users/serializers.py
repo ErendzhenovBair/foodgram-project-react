@@ -1,11 +1,10 @@
 import logging
 
 from django.contrib.auth import get_user_model
-from djoser.serializers import UserCreateSerializer, UserSerializer
+from djoser.serializers import (UserCreateSerializer, UserSerializer)
 from rest_framework import serializers, status
-from rest_framework.validators import UniqueTogetherValidator
 
-from foodgram.settings import RECIPES_LIMIT
+from foodgram.settings import LIMIT
 from recipes.models import Recipe
 from users.models import Subscription
 
@@ -14,7 +13,6 @@ log = logging.getLogger(__name__)
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    """User model (create user) Serializer."""
 
     class Meta:
         model = User
@@ -91,7 +89,6 @@ class SubscriptionRecipeShortSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionShowSerializer(CustomUserSerializer):
-    """"Subscription Model Serializer."""
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
@@ -109,7 +106,7 @@ class SubscriptionShowSerializer(CustomUserSerializer):
         )
 
     def get_recipes(self, object):
-        author_recipes = object.recipes.all()[:RECIPES_LIMIT]
+        author_recipes = object.recipes.all()[:LIMIT]
         return SubscriptionRecipeShortSerializer(
             author_recipes, many=True
         ).data

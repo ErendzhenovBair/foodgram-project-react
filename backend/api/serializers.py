@@ -7,14 +7,14 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import IntegerField, SerializerMethodField
+from rest_framework.fields import IntegerField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer, ReadOnlyField
 from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import (
-    Favourite, Ingredient, IngredientsAmount, Recipe, ShoppingCart, Tag)
-from users.models import Subscription, User
+    Ingredient, IngredientsAmount, Recipe, ShoppingCart, Tag)
+from users.models import User
 from users.serializers import CustomUserSerializer
 
 SELF_FOLLOW_ERROR = "You can't subscribe to yourself"
@@ -33,6 +33,7 @@ class Base64ImageField(serializers.ImageField):
 
 
 class IngredientSerializer(ModelSerializer):
+
     class Meta:
         model = Ingredient
         fields = (
@@ -155,10 +156,9 @@ class RecipeSerializer(ModelSerializer):
         return value
 
     def validate_tags(self, tags):
-        """Проверяем, что рецепт содержит уникальные теги."""
         if len(tags) != len(set(tags)):
             raise serializers.ValidationError(
-                'Теги рецепта должны быть уникальными'
+                'The tags must be unique!'
             )
         return tags
 
@@ -174,9 +174,10 @@ class RecipeSerializer(ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
+        author = self.context.get('request').user
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(**validated_data)
+        recipe = Recipe.objects.create(author=author, **validated_data)
         recipe.tags.set(tags)
         self.create_ingredients_amounts(recipe=recipe, ingredients=ingredients)
         return recipe

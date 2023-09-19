@@ -29,8 +29,7 @@ class CustomUserViewSet(UserViewSet):
         methods=['get', 'patch'],
         url_path='me',
         url_name='me',
-        permission_classes=[IsAuthenticated]
-    )
+        permission_classes=(IsAuthenticated,))
     def get_me(self, request):
         if request.method == 'PATCH':
             serializer = CustomUserSerializer(

@@ -7,11 +7,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv()
 
-SECRET_KEY = 'django-insecure-yaktm$t0!b(f_oq645q=ho*sdn+9ynyf^fl3yfx@-&sv^n(kd_'
+SECRET_KEY = os.getenv('SECRET_KEY', 'default')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["158.160.76.225", "localhost", "127.0.0.1", 'myfoodgram790.hopto.org']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1 localhost').split()
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -65,6 +65,8 @@ DJOSER = {
     'PERMISSIONS': {
         'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
         'user_list': ['rest_framework.permissions.AllowAny'],
+        'token_create': ['rest_framework.permissions.AllowAny'],
+        'user_create': ['rest_framework.permissions.AllowAny'],
     }
 }
 
@@ -123,19 +125,14 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    },
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'django'),
+        'USER': os.getenv('POSTGRES_USER', 'django'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', ''),
+        'PORT': os.getenv('DB_PORT', 5432)
+    }
 }
-
-# 'default': {
-#    'ENGINE': 'django.db.backends.postgresql',
-#   'NAME': os.getenv('POSTGRES_DB'),
-#    'USER': os.getenv('POSTGRES_USER'),
-#   'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-#    'HOST': 'localhost',
-#    'PORT': os.getenv('DB_PORT', 5432),
-# },
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -174,14 +171,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+CSV_FILES_DIR = os.path.join(BASE_DIR, 'data')
+
 STATIC_URL = '/static/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 APP_PREFIX = 'api'
+
+APP_PREFIX_2 = 'users'
 
 MIN_COOK_TIME = 1
 
 NUMBER_OF_RECIPES = 6
 
-RECIPES_LIMIT = 3
+LIMIT = 3
