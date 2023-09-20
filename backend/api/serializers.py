@@ -12,9 +12,8 @@ from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer, ReadOnlyField
 from rest_framework.validators import UniqueTogetherValidator
 
-from recipes.models import (
-    Ingredient, IngredientsAmount,
-    Recipe, ShoppingCart, Tag)
+from recipes.models import (Ingredient, IngredientsAmount, Recipe,
+                            ShoppingCart, Tag)
 from users.models import User
 from users.serializers import CustomUserSerializer
 

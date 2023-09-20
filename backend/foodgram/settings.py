@@ -1,7 +1,7 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
-from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -177,10 +177,6 @@ CSV_FILES_DIR = os.path.join(BASE_DIR, 'data')
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-APP_PREFIX = 'api'
-
-APP_PREFIX_2 = 'users'
 
 MIN_COOK_TIME = 1
 

@@ -1,10 +1,9 @@
-from api.views import IngredientViewSet, RecipeViewSet, TagViewSet
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from foodgram.settings import APP_PREFIX
+from api.views import IngredientViewSet, RecipeViewSet, TagViewSet
 
-app_name = APP_PREFIX
+app_name = 'api'
 
 router_v1 = DefaultRouter()
 router_v1.register('recipes', RecipeViewSet, basename='recipes')

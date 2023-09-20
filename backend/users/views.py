@@ -9,12 +9,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.pagination import CustomPagination
 from users.models import Subscription
-from users.serializers import (
-    CustomUserSerializer,
-    SubscriptionSerializer,
-    SubscriptionShowSerializer)
+from users.serializers import (CustomUserSerializer, SubscriptionSerializer,
+                               SubscriptionShowSerializer)
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -23,7 +20,6 @@ log = logging.getLogger(__name__)
 class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
-    pagination_class = CustomPagination
 
     @action(
         detail=False,

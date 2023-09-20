@@ -1,5 +1,5 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
@@ -10,15 +10,14 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .permissions import IsAuthorOrAdminReadOnly
-from recipes.models import (
-    Favourite, Ingredient, IngredientsAmount,
-    Recipe, ShoppingCart, Tag
-)
+from recipes.models import (Favourite, Ingredient, IngredientsAmount, Recipe,
+                            ShoppingCart, Tag)
+
 from .filters import IngredientFilter, RecipeFilter
-from .serializers import (
-    IngredientSerializer, RecipeLightSerializer, RecipeGETSerializer,
-    RecipeSerializer, ShoppingCartSerializer, TagSerializer)
+from .permissions import IsAuthorOrAdminReadOnly
+from .serializers import (IngredientSerializer, RecipeGETSerializer,
+                          RecipeLightSerializer, RecipeSerializer,
+                          ShoppingCartSerializer, TagSerializer)
 
 User = get_user_model()
 
