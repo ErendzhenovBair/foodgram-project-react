@@ -2,10 +2,9 @@ import logging
 
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from rest_framework import serializers, status
-
 from foodgram.settings import LIMIT
 from recipes.models import Recipe
+from rest_framework import serializers, status
 from users.models import Subscription
 
 User = get_user_model()
