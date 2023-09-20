@@ -9,7 +9,7 @@ load_dotenv()
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default')
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', default=False)
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1 localhost').split()
 
@@ -158,7 +158,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
