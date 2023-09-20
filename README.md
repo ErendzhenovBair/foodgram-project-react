@@ -1,4 +1,5 @@
-    # Продуктовый помощник - FOODGRAM
+# Продуктовый помощник - FOODGRAM
+
 ![Foodgram workflow](https://github.com/ErendzhenovBair/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
 ## Описание проекта
