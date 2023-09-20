@@ -1,70 +1,22 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-SUBSCRIPTION_MESSAGE = "{subcriber} subscribed on {subscribing}"
-
 
 class User(AbstractUser):
-    """Custom User Model."""
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ('first_name', 'last_name', 'username', 'password',)
-    GUEST = 'guest'
-    AUTHORIZED = 'authorized'
-    ADMIN = 'admin'
-    USER_ROLES = [
-        (GUEST, 'guest'),
-        (AUTHORIZED, 'authorized'),
-        (ADMIN, 'admin'),
+    REQUIRED_FIELDS = [
+        'username',
+        'first_name',
+        'last_name',
     ]
     email = models.EmailField(
+        'email',
         max_length=254,
         unique=True,
-        verbose_name='Email',
     )
-    username = models.CharField(
-        blank=False,
-        max_length=150,
-        unique=True,
-        verbose_name='Username',
-    )
-    first_name = models.CharField(
-        blank=False,
-        max_length=150,
-        verbose_name='First Name',
-    )
-    last_name = models.CharField(
-        blank=False,
-        max_length=150,
-        verbose_name='Last Name',
-    )
-    password = models.CharField(
-        max_length=150,
-        verbose_name='Password',
-    )
-    role = models.CharField(
-        default='guest',
-        choices=USER_ROLES,
-        max_length=10,
-        verbose_name='User Role',
-    )
-
-    @property
-    def is_guest(self):
-        """Checking for unauthorized user rights."""
-        return self.role == self.GUEST
-
-    @property
-    def is_authorized(self):
-        """Checking for authorized user rights."""
-        return self.role == self.AUTHORIZED
-
-    @property
-    def is_admin(self):
-        """Checking for administrator rights."""
-        return self.role == self.ADMIN or self.is_superuser
 
     class Meta:
-        ordering = ('id',)
+        ordering = ['id']
         verbose_name = 'User'
         verbose_name_plural = 'Users'
 
@@ -73,7 +25,6 @@ class User(AbstractUser):
 
 
 class Subscription(models.Model):
-    """The subscription model for the recipe author."""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -98,5 +49,4 @@ class Subscription(models.Model):
         ]
 
     def __str__(self):
-        return SUBSCRIPTION_MESSAGE.format(
-            subscriber=self.user.username, subscribing=self.author.username)
+        return f'{self.user} subscribed to: {self.author}'
