@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from rest_framework import serializers
 
 
 class User(AbstractUser):
@@ -47,6 +48,11 @@ class Subscription(models.Model):
                 name='unique_pair_subscriber_subscribing'
             )
         ]
+
+    def validate_subscribe(self):
+        if self.user == self.author:
+            raise serializers.ValidationError(
+                'The user cannot subscribe to himself')
 
     def __str__(self):
         return f'{self.user} subscribed to: {self.author}'

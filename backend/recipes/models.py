@@ -1,8 +1,11 @@
+from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
-from foodgram.settings import MIN_COOK_TIME
+from foodgram.settings import (COLOR_LENGTH, ING_LENGTH, MAX_COOK_TIME,
+                               MIN_COOK_TIME, SLUG_LENGTH, TAG_LENGTH,
+                               TEXT_LENGTH, UNIT_LENGTH)
 
 User = get_user_model()
 
@@ -11,17 +14,21 @@ class Ingredient(models.Model):
     """Ingredient model."""
     name = models.CharField(
         blank=False,
-        max_length=200,
+        max_length=ING_LENGTH,
         verbose_name='Ingredients Name',
         db_index=True
     )
     measurement_unit = models.CharField(
         blank=False,
-        max_length=150,
+        max_length=UNIT_LENGTH,
         verbose_name='Measurement Unit',
     )
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=('name', 'measurement_unit'),
+                name='unique_name_measurement')]
         ordering = ('name',)
         verbose_name = 'Ingredient'
         verbose_name_plural = 'Ingredients'
@@ -34,18 +41,19 @@ class Tag(models.Model):
     """Tag model."""
     name = models.CharField(
         unique=True,
-        max_length=50,
+        max_length=TAG_LENGTH,
         verbose_name='Tag name',
     )
-    color = models.CharField(
-        unique=True,
-        max_length=16,
+    color = ColorField(
+        default='#FF0000',
+        max_length=COLOR_LENGTH,
         verbose_name='Color (Hex-Code)',
+        unique=True
     )
     slug = models.SlugField(
         verbose_name='Unique slug',
         unique=True,
-        max_length=200
+        max_length=SLUG_LENGTH
     )
 
     class Meta:
@@ -85,7 +93,7 @@ class Recipe(models.Model):
         verbose_name='Image',
     )
     text = models.CharField(
-        max_length=500,
+        max_length=TEXT_LENGTH,
         verbose_name='Text',
     )
     cooking_time = models.PositiveIntegerField(
@@ -94,6 +102,10 @@ class Recipe(models.Model):
             MinValueValidator(
                 MIN_COOK_TIME,
                 message=f'Minimal cooking time is {MIN_COOK_TIME}!'
+            ),
+            MaxValueValidator(
+                MAX_COOK_TIME,
+                message=f'Maximal cooking time is {MAX_COOK_TIME}'
             )
         ],
         help_text='in minutes',
