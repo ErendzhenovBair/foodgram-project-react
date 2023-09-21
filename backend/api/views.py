@@ -5,7 +5,7 @@ from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (Favourite, Ingredient, IngredientsAmount, Recipe,
+from recipes.models import (Favourite, Ingredient, IngredientAmount, Recipe,
                             ShoppingCart, Tag)
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -180,7 +180,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = request.user
         if not user.shopping_cart.exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        ingredients_cart = IngredientsAmount.objects.filter(
+        ingredients_cart = IngredientAmount.objects.filter(
             recipe__shopping_cart__user=request.user
         ).values(
             'ingredient__name',

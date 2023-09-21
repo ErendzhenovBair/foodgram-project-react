@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from recipes.models import (Favourite, Ingredient, IngredientsAmount, Recipe,
+from recipes.models import (Favourite, Ingredient, IngredientAmount, Recipe,
                             ShoppingCart, Tag)
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
@@ -161,7 +161,7 @@ class IngredientsInRecipeWriteSerializer(ModelSerializer):
     id = IntegerField(write_only=True)
 
     class Meta:
-        model = IngredientsAmount
+        model = IngredientAmount
         fields = ('id', 'amount')
 
     def get_name(self, ingredient):
@@ -175,7 +175,7 @@ class IngredientFullSerializer(ModelSerializer):
         source="ingredient.measurement_unit")
 
     class Meta:
-        model = IngredientsAmount
+        model = IngredientAmount
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
@@ -267,8 +267,8 @@ class RecipeSerializer(ModelSerializer):
         return tags
 
     def create_ingredients_amounts(self, ingredients, recipe):
-        IngredientsAmount.objects.bulk_create(
-            [IngredientsAmount(
+        IngredientAmount.objects.bulk_create(
+            [IngredientAmount(
                 ingredient=Ingredient.objects.get(id=ingredient['id']),
                 recipe=recipe,
                 amount=ingredient['amount']

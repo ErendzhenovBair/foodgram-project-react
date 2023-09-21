@@ -15,7 +15,7 @@ class Ingredient(models.Model):
     name = models.CharField(
         blank=False,
         max_length=ING_LENGTH,
-        verbose_name='Ingredients Name',
+        verbose_name='Ingredient Name',
         db_index=True
     )
     measurement_unit = models.CharField(
@@ -74,7 +74,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through='IngredientsAmount',
+        through='IngredientAmount',
         related_name='recipes',
         verbose_name='Ingredients',
     )
@@ -149,7 +149,7 @@ class Favourite(models.Model):
         )
 
 
-class IngredientsAmount(models.Model):
+class IngredientAmount(models.Model):
     """Ingredients list model."""
     recipe = models.ForeignKey(
         Recipe,
@@ -167,7 +167,7 @@ class IngredientsAmount(models.Model):
         validators=[MinValueValidator(1, 'the weight cannot be less than 1')])
 
     class Meta:
-        verbose_name = 'Ingredients amount'
+        verbose_name = 'Ingredient amount'
         constraints = [
             models.UniqueConstraint(fields=['ingredient', 'recipe'],
                                     name='unique_recipe_ingredient')
