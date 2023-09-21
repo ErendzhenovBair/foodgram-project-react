@@ -19,7 +19,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = ('author', 'name', 'tags',)
     empty_value_display = '-пусто-'
 
-    def get_ingredients(sef, obj):
+    def get_ingredients(self, obj):
         return '\n'.join(
             (ingredient.name for ingredient in obj.ingredients.all())
         )
