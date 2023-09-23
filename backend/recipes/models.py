@@ -3,9 +3,10 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
+
 from foodgram.settings import (COLOR_LENGTH, ING_LENGTH, MAX_COOK_TIME,
-                               MIN_COOK_TIME, SLUG_LENGTH, TAG_LENGTH,
-                               TEXT_LENGTH, UNIT_LENGTH)
+                               MIN_COOK_TIME, NAME_LENGTH, SLUG_LENGTH,
+                               TAG_LENGTH, TEXT_LENGTH, UNIT_LENGTH)
 
 User = get_user_model()
 
@@ -84,7 +85,7 @@ class Recipe(models.Model):
         verbose_name='Tags'
     )
     name = models.CharField(
-        max_length=200,
+        max_length=NAME_LENGTH,
         unique=True,
         verbose_name='Title',
     )

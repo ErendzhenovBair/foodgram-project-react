@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from rest_framework import serializers
+from django.db.models import CheckConstraint, F, Q
+
+from foodgram.settings import EMAIL_LENGTH
 
 
 class User(AbstractUser):
@@ -12,7 +14,7 @@ class User(AbstractUser):
     ]
     email = models.EmailField(
         'email',
-        max_length=254,
+        max_length=EMAIL_LENGTH,
         unique=True,
     )
 
@@ -43,16 +45,15 @@ class Subscription(models.Model):
         verbose_name = 'Subscription'
         verbose_name_plural = 'Subscriptions'
         constraints = [
+            CheckConstraint(
+                check=~Q(user=F('author')),
+                name='check_user_not_subscribe_to_self'
+            ),
             models.UniqueConstraint(
                 fields=['user', 'author'],
                 name='unique_pair_subscriber_subscribing'
             )
         ]
-
-    def validate_subscribe(self):
-        if self.user == self.author:
-            raise serializers.ValidationError(
-                'The user cannot subscribe to himself')
 
     def __str__(self):
         return f'{self.user} subscribed to: {self.author}'

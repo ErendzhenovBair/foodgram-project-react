@@ -9,7 +9,7 @@ load_dotenv()
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default')
 
-DEBUG = bool(os.getenv('DEBUG', True))
+DEBUG = os.getenv('DEBUG', default='False').lower() in ('true')
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1 localhost').split()
 
@@ -60,7 +60,6 @@ DJOSER = {
     'HIDE_USERS': False,
     'SERIALIZERS': {
         'user': 'api.serializers.CustomUserSerializer',
-        'user_create': 'api.serializers.CustomUserCreateSerializer',
         'current_user': 'api.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
@@ -180,9 +179,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 COLOR_LENGTH = 7
 
+EMAIL_LENGTH = 254
+
 MAX_COOK_TIME = 43200
 
 MIN_COOK_TIME = 1
+
+NAME_LENGTH = 200
 
 ING_LENGTH = 200
 
