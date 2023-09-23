@@ -19,9 +19,9 @@ from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorOrAdminReadOnly
 from .serializers import (CustomUserSerializer, FavoriteSerializer,
                           IngredientSerializer, RecipeGETSerializer,
-                          RecipeLightSerializer, RecipeSerializer,
-                          ShoppingCartSerializer, SubscriptionSerializer,
-                          SubscriptionShowSerializer, TagSerializer)
+                          RecipeSerializer, ShoppingCartSerializer,
+                          SubscriptionSerializer, SubscriptionShowSerializer,
+                          TagSerializer)
 from .utils import create_shopping_cart
 
 User = get_user_model()
