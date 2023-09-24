@@ -165,10 +165,10 @@ class IngredientsInRecipeWriteSerializer(ModelSerializer):
 
 
 class IngredientFullSerializer(ModelSerializer):
-    id = ReadOnlyField(source="ingredient.id")
-    name = ReadOnlyField(source="ingredient.name")
+    id = ReadOnlyField(source='ingredient.id')
+    name = ReadOnlyField(source='ingredient.name')
     measurement_unit = ReadOnlyField(
-        source="ingredient.measurement_unit")
+        source='ingredient.measurement_unit')
 
     class Meta:
         model = IngredientAmount
@@ -233,13 +233,12 @@ class RecipeSerializer(ModelSerializer):
         )
 
     def validate_ingredients(self, value):
-        ingredients = value
-        if not ingredients:
+        if not value:
             raise ValidationError({
                 'ingredients': 'At least one ingredient is needed!'
             })
         ingredients_list = []
-        for item in ingredients:
+        for item in value:
             ingredient = get_object_or_404(Ingredient, id=item['id'])
             if ingredient in ingredients_list:
                 raise ValidationError({

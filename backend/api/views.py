@@ -88,7 +88,7 @@ class CustomUserViewSet(UserViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def subscriptions(self, request):
-        authors = User.objects.filter(subscribing__user=request.user)
+        authors = self.request.user.subscriber.all()
         paginator = PageNumberPagination()
         result_pages = paginator.paginate_queryset(
             queryset=authors, request=request
