@@ -4,7 +4,6 @@ import logging
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import transaction
-from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -241,18 +240,18 @@ class RecipeSerializer(ModelSerializer):
             raise ValidationError({
                 'ingredients': 'At least one ingredient is needed!'
             })
-        ingredients_list = []
-        for item in value:
-            ingredient = get_object_or_404(Ingredient, id=item['id'])
-            if ingredient in ingredients_list:
-                raise ValidationError({
-                    'ingredients': 'The ingredients must be unique!'
-                })
-            if int(item['amount']) <= 0:
+        ingredients_list = [
+            ingredient.get('id') for ingredient in value
+        ]
+        if len(ingredients_list) != len(set(ingredients_list)):
+            raise ValidationError({
+                'ingredients': 'The ingredients must be unique!'
+            })
+        for ingredient in value:
+            if int(ingredient['amount']) <= 0:
                 raise ValidationError({
                     'amount': 'The amount must be greater than 0!'
                 })
-            ingredients_list.append(ingredient)
         return value
 
     def validate_tags(self, tags):
