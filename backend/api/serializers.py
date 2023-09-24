@@ -157,7 +157,7 @@ class TagSerializer(ModelSerializer):
 
 
 class IngredientsInRecipeWriteSerializer(ModelSerializer):
-    id = IntegerField(write_only=True)
+    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
 
     class Meta:
         model = IngredientAmount
