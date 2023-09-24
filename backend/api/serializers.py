@@ -176,7 +176,11 @@ class IngredientFullSerializer(ModelSerializer):
 class RecipeGETSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
-    ingredients = serializers.SerializerMethodField()
+    ingredients = IngredientFullSerializer(
+        many=True,
+        source='recipe',
+        required=True,
+    )
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
@@ -194,11 +198,6 @@ class RecipeGETSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time'
         )
-
-    @staticmethod
-    def get_ingredients(object):
-        ingredients = IngredientAmount.objects.filter(recipe=object)
-        return IngredientFullSerializer(ingredients, many=True).data
 
     def get_is_favorited(self, recipe):
         user = self.context.get('request').user
