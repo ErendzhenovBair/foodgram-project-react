@@ -196,6 +196,11 @@ class RecipeGETSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
+    @staticmethod
+    def get_ingredients(object):
+        ingredients = IngredientAmount.objects.filter(recipe=object)
+        return IngredientFullSerializer(ingredients, many=True).data
+
     def get_is_favorited(self, recipe):
         user = self.context.get('request').user
         return (
