@@ -70,7 +70,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         validators = [
             UniqueTogetherValidator(
                 queryset=Subscription.objects.all(),
-                fields=('user', 'subscriber'),
+                fields=('user', 'author'),
                 message='You have already subscribed to this user.'
             )
         ]
