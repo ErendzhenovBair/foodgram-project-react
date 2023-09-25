@@ -78,7 +78,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data['user'] == data['author']:
             raise serializers.ValidationError(
-                'You cannot subscribe to yourself.'
+                'You cannot subscribe to yourself!'
             )
         return data
 
