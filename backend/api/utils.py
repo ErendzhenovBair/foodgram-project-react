@@ -7,8 +7,7 @@ def create_shopping_cart(ingredients_cart, user):
     today = datetime.today()
     shopping_cart = (
         f'Shopping cart for: {user.get_full_name()}\n\n'
-        f'Date: {today:%Y-%m-%d}\n\n'
-    )
+        f'Date: {today:%Y-%m-%d}\n\n')
     shopping_cart += '\n'.join(
         [
             f'- {ingredient["ingredient__name"]} '
