@@ -46,7 +46,7 @@ class Subscription(models.Model):
         verbose_name_plural = 'Subscriptions'
         constraints = [
             CheckConstraint(
-                check=~Q(user=F('author')),
+                check=~models.Q(user=models.F('author')),
                 name='check_user_not_subscribe_to_self'
             ),
             models.UniqueConstraint(

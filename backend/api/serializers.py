@@ -176,7 +176,10 @@ class IngredientFullSerializer(ModelSerializer):
 class RecipeGETSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
-    ingredients = IngredientFullSerializer(many=True)
+    ingredients = IngredientFullSerializer(
+        source='ingredients_in_recipes',
+        many=True
+    )
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
@@ -329,7 +332,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favourite
-        fields = '__all__'
+        fields = ('user', 'recipe')
         validators = [
             UniqueTogetherValidator(
                 queryset=Favourite.objects.all(),
@@ -339,6 +342,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['recipe'] = RecipeLightSerializer(instance.recipe).data
-        return representation
+        return RecipeLightSerializer(
+            instance,
+            context={'request': self.context.get('request')}
+        ).data

@@ -62,21 +62,18 @@ class CustomUserViewSet(UserViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def subscribe(self, request, **kwargs):
-        user = request.user
         author = get_object_or_404(User, id=self.kwargs.get('id'))
-
         if request.method == 'POST':
             serializer = SubscriptionSerializer(
-                author, data=request.data, context={'request': request})
+                data={'user': request.user.id, 'author': author.id}
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            author_serializer = SubscriptionShowSerializer(
-                author, context={'request': request})
             return Response(
-                author_serializer.data, status=status.HTTP_201_CREATED
+                serializer.data, status=status.HTTP_201_CREATED
             )
         subscription = get_object_or_404(
-            Subscription, user=user, author=author)
+            Subscription, user=request.user, author=author)
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -88,7 +85,7 @@ class CustomUserViewSet(UserViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def subscriptions(self, request):
-        authors = self.request.user.subscriber.all()
+        authors = request.user.subscriber.all()
         paginator = PageNumberPagination()
         result_pages = paginator.paginate_queryset(
             queryset=authors, request=request
