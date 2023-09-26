@@ -276,26 +276,20 @@ class RecipeSerializer(ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(author=author, **validated_data)
         recipe.tags.set(tags)
-        self.create_ingredients_amounts(recipe, ingredients)
+        self.create_ingredients_amounts(recipe=recipe, ingredients=ingredients)
         return recipe
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        recipe = instance
-        instance.image = validated_data.get('image', instance.image)
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.name)
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time
-        )
-        instance.tags.clear()
-        instance.ingredients.clear()
-        tags = validated_data.get('tags')
-        instance.tags.set(tags)
-        ingredients = validated_data.get('ingredients')
-        self.create_ingredients_amounts(recipe, ingredients)
-        instance.save()
-        return instance
+        if 'ingredients' in validated_data:
+            ingredients = validated_data.pop('ingredients')
+            instance.ingredients.clear()
+            self.create_ingredients_amounts(ingredients, instance)
+        if 'tags' in validated_data:
+            instance.tags.set(
+                validated_data.pop('tags'))
+        return super().update(
+            instance, validated_data)
 
     def to_representation(self, instance):
         request = self.context.get('request')
