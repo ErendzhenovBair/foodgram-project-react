@@ -7,7 +7,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -85,14 +84,14 @@ class CustomUserViewSet(UserViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def subscriptions(self, request):
-        authors = request.user.subscribing.all()
-        paginator = PageNumberPagination()
-        result_pages = paginator.paginate_queryset(
-            queryset=authors, request=request
+        author_id = request.user.subscriber.all().values_list(
+            'author_id', flat=True
         )
+        authors = User.objects.filter(id__in=author_id)
+        paginated_queryset = self.paginate_queryset(authors)
         serializer = SubscriptionShowSerializer(
-            result_pages, many=True, context={'request': request})
-        return paginator.get_paginated_response(serializer.data)
+            paginated_queryset, many=True, context={'request': request})
+        return self.get_paginated_response(serializer.data)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
