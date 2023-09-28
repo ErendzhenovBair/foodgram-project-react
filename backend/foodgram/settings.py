@@ -72,7 +72,8 @@ DJOSER = {
 
 INTERNAL_IPS = [
     '127.0.0.1',
-    '127.0.0.1:8080', ]
+    '127.0.0.1:8080',
+]
 
 AUTH_USER_MODEL = 'users.User'
 
