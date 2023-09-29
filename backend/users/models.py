@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import CheckConstraint
 
 from foodgram.settings import EMAIL_LENGTH
 
@@ -47,10 +47,6 @@ class Subscription(models.Model):
         verbose_name = 'Subscription'
         verbose_name_plural = 'Subscriptions'
         constraints = [
-            CheckConstraint(
-                check=~models.Q(user=models.F('author')),
-                name='check_user_not_subscribe_to_self'
-            ),
             models.UniqueConstraint(
                 fields=['user', 'author'],
                 name='unique_pair_subscriber_subscribing'
@@ -59,3 +55,7 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f'{self.user} subscribed to: {self.author}'
+
+    def clean(self):
+        if self.user == self.author:
+            raise ValidationError('You cannot subscribe to yourself.')
