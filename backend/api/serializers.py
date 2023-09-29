@@ -11,6 +11,7 @@ from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer, ReadOnlyField
 from rest_framework.validators import UniqueTogetherValidator
 
+from foodgram.settings import MAX_COOK_TIME, ZERO_VALUE
 from recipes.models import (Favourite, Ingredient, IngredientAmount,
                             Recipe, ShoppingCart, Tag)
 from users.models import Subscription
@@ -107,9 +108,12 @@ class SubscriptionShowSerializer(CustomUserSerializer):
         read_only_fields = ('email', 'username')
 
     def get_recipes(self, object):
-        author_recipes = object.recipes.all()
+        limit = self.context.get('request').GET.get('recipes_limit')
+        recipes = object.recipes.all()
+        if limit:
+            recipes = recipes[:int(limit)]
         return SubscriptionRecipeShortSerializer(
-            author_recipes, many=True
+            recipes, many=True
         ).data
 
     def get_recipes_count(self, object):
@@ -240,9 +244,9 @@ class RecipeSerializer(ModelSerializer):
                 'ingredients': 'The ingredients must be unique!'
             })
         for ingredient in value:
-            if int(ingredient['amount']) <= 0:
+            if int(ingredient['amount']) <= ZERO_VALUE:
                 raise ValidationError({
-                    'amount': 'The amount must be greater than 0!'
+                    'amount': f'The amount must be greater than {ZERO_VALUE}!'
                 })
         return value
 
@@ -256,6 +260,14 @@ class RecipeSerializer(ModelSerializer):
                 'The tags must be unique!'
             )
         return tags
+
+    def validate_cooking_time(self, value):
+        if value > MAX_COOK_TIME or value <= ZERO_VALUE:
+            raise ValidationError(
+                f'The cooking time must be greater than {ZERO_VALUE} and '
+                f'less than or equal to {MAX_COOK_TIME}'
+            )
+        return value
 
     def create_ingredients_amounts(self, ingredients, recipe):
         IngredientAmount.objects.bulk_create(

@@ -84,10 +84,7 @@ class CustomUserViewSet(UserViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def subscriptions(self, request):
-        author_id = request.user.subscriber.all().values_list(
-            'author_id', flat=True
-        )
-        authors = User.objects.filter(id__in=author_id)
+        authors = User.objects.filter(subscribing__user=request.user)
         paginated_queryset = self.paginate_queryset(authors)
         serializer = SubscriptionShowSerializer(
             paginated_queryset, many=True, context={'request': request})
@@ -149,7 +146,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='shopping_cart',
         permission_classes=(permissions.IsAuthenticated,)
     )
-    def get_shopping_cart(self, request, pk):
+    def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
         if request.method == 'POST':
             serializer = ShoppingCartSerializer(
