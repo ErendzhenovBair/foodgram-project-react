@@ -28,3 +28,4 @@ class UserAdmin(admin.ModelAdmin):
 class SubscriptionAdmin(admin.ModelAdmin):
     form = UserChangeForm
     list_display = ('id', 'user', 'author',)
+    search_fields = ('author',)
