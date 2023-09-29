@@ -1,11 +1,23 @@
 from django.contrib import admin
+from django.core.exceptions import ValidationError
+from django.forms import BaseInlineFormSet
 
 from .models import (Favourite, Ingredient, IngredientAmount, Recipe,
                      ShoppingCart, Tag)
 
 
+class IngredientAmountFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        if not any(
+            form.cleaned_data.get('DELETE', False) for form in self.forms
+        ):
+            raise ValidationError('At least one ingredient is needed!')
+
+
 class IngredientAmountInline(admin.TabularInline):
     model = IngredientAmount
+    formset = IngredientAmountFormSet
     min_num = 1
     autocomplete_fields = ('ingredient',)
 
