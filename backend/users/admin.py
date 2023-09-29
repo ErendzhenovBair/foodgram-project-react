@@ -1,19 +1,24 @@
 from django import forms
 from django.contrib import admin
 
+from users.models import Subscription
+
 from .models import Subscription, User
 
 
-class UserChangeForm(forms.ModelForm):
-
+class SubscriptionForm(forms.ModelForm):
     class Meta:
-        model = User
+        model = Subscription
         fields = '__all__'
+
+    def clean(self):
+        if self.cleaned_data.get('user') == self.cleaned_data.get('author'):
+            raise forms.ValidationError('You cannot subscribe to yourself!')
+        return self.cleaned_data
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    form = UserChangeForm
     list_display = (
         'id', 'email',
         'username', 'first_name',
@@ -26,6 +31,6 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    form = UserChangeForm
+    form = SubscriptionForm
     list_display = ('id', 'user', 'author',)
     search_fields = ('author',)

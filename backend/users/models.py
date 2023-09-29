@@ -1,5 +1,4 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import CheckConstraint
 
@@ -57,12 +56,6 @@ class Subscription(models.Model):
                 name='unique_pair_subscriber_subscribing'
             )
         ]
-
-    def clean(self):
-        if self.user == self.author:
-            raise ValidationError(
-                {'user': ('You cannot subscribe to yourself!')}
-            )
 
     def __str__(self):
         return f'{self.user} subscribed to: {self.author}'
