@@ -5,11 +5,13 @@ from django.forms.models import BaseInlineFormSet
 from .models import (Favourite, Ingredient, IngredientAmount, Recipe,
                      ShoppingCart, Tag)
 
+from foodgram.settings import ZERO_VALUE
+
 
 class IngredientAmountFormset(BaseInlineFormSet):
     def clean(self):
         super(IngredientAmountFormset, self).clean()
-        count = 0
+        count = ZERO_VALUE
         for form in self.forms:
             if form.cleaned_data.get('DELETE'):
                 count += 1
