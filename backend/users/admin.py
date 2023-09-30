@@ -5,7 +5,6 @@ from users.models import Subscription
 from .models import Subscription, User
 
 
-@admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'email',
@@ -17,7 +16,10 @@ class UserAdmin(admin.ModelAdmin):
     empty_value_display = '-empty-'
 
 
-@admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'author',)
     search_fields = ('author',)
+
+
+admin.site.register(User, UserAdmin)
+admin.site.register(Subscription, SubscriptionAdmin)

@@ -1,52 +1,42 @@
 from django.contrib import admin
 from django.core.exceptions import ValidationError
-from django.forms import BaseInlineFormSet
+from django.forms.models import BaseInlineFormSet
 
 from .models import (Favourite, Ingredient, IngredientAmount, Recipe,
                      ShoppingCart, Tag)
 
 
-class IngredientAmountFormSet(BaseInlineFormSet):
+class IngredientAmountFormset(BaseInlineFormSet):
     def clean(self):
-        super().clean()
-        if not any(
-            form.cleaned_data.get('DELETE', False) for form in self.forms
-        ):
-            raise ValidationError('At least one ingredient is needed!')
+        super(IngredientAmountFormset, self).clean()
+        count = 0
+        for form in self.forms:
+            if form.cleaned_data.get('DELETE'):
+                count += 1
+        if count == len(self.forms):
+            raise ValidationError('You cannot delete all ingredients')
 
 
 class IngredientAmountInline(admin.TabularInline):
     model = IngredientAmount
-    formset = IngredientAmountFormSet
+    formset = IngredientAmountFormset
+    extra = 1
     min_num = 1
     autocomplete_fields = ('ingredient',)
 
 
-@admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'author', 'get_tags',
-                    'get_ingredients', 'added_in_favorites')
+    list_display = ('id', 'name', 'author',
+                    'added_in_favorites')
     inlines = (IngredientAmountInline,)
     readonly_fields = ('added_in_favorites',)
     list_filter = ('author', 'name', 'tags',)
     empty_value_display = '-пусто-'
 
-    def get_ingredients(self, obj):
-        return '\n'.join(
-            (ingredient.name for ingredient in obj.ingredients.all())
-        )
-    get_ingredients.short_description = 'ingredients'
-
-    def get_tags(self, obj):
-        return '\n'.join((tag.name for tag in obj.tags.all()))
-    get_ingredients.short_description = 'tags'
-
     def added_in_favorites(self, obj):
         return obj.favourites.count()
-    get_ingredients.short_description = 'favorites'
 
 
-@admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit',)
     list_filter = ('name',)
@@ -54,7 +44,6 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'color', 'slug',)
     empty_value_display = '-пусто-'
@@ -62,21 +51,26 @@ class TagAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(Favourite)
 class FavouriteAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe',)
     empty_value_display = '-пусто-'
 
 
-@admin.register(IngredientAmount)
 class IngredientAmountADmin(admin.ModelAdmin):
     list_display = ('recipe', 'ingredient', 'amount',)
     empty_value_display = '-пусто-'
 
 
-@admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe',)
     empty_value_display = '-пусто-'
     list_filter = ('user',)
     search_fields = ('user',)
+
+
+admin.site.register(Recipe, RecipeAdmin)
+admin.site.register(Ingredient, IngredientAdmin)
+admin.site.register(Tag, TagAdmin)
+admin.site.register(Favourite, FavouriteAdmin)
+admin.site.register(IngredientAmount, IngredientAmountADmin)
+admin.site.register(ShoppingCart, ShoppingCartAdmin)
