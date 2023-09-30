@@ -62,9 +62,9 @@ class Subscription(models.Model):
     def __str__(self):
         return f'{self.user} subscribed to: {self.author}'
 
-    def clean(self):
+    def save(self, *args, **kwargs):
         if self.user == self.author:
             raise ValidationError(
                 {'user': _('You cannot subscribe to yourself!')}
             )
-        super().clean()
+        super().save(*args, **kwargs)
