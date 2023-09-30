@@ -67,3 +67,4 @@ class Subscription(models.Model):
             raise ValidationError(
                 {'user': _('You cannot subscribe to yourself!')}
             )
+        super().clean()
