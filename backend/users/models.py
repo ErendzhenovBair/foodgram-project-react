@@ -49,10 +49,6 @@ class Subscription(models.Model):
         verbose_name = 'Subscription'
         verbose_name_plural = 'Subscriptions'
         constraints = [
-            CheckConstraint(
-                check=~models.Q(user=models.F('author')),
-                name='check_user_not_subscribe_to_self',
-            ),
             models.UniqueConstraint(
                 fields=['user', 'author'],
                 name='unique_pair_subscriber_subscribing'
@@ -62,9 +58,8 @@ class Subscription(models.Model):
     def __str__(self):
         return f'{self.user} subscribed to: {self.author}'
 
-    def save(self, *args, **kwargs):
+    def clean(self):
         if self.user == self.author:
             raise ValidationError(
                 {'user': _('You cannot subscribe to yourself!')}
             )
-        super().save(*args, **kwargs)
