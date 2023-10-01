@@ -11,7 +11,7 @@ from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer, ReadOnlyField
 from rest_framework.validators import UniqueTogetherValidator
 
-from foodgram.settings import MAX_COOK_TIME, ZERO_VALUE
+from foodgram.settings import ZERO_VALUE
 from recipes.models import (Favourite, Ingredient, IngredientAmount,
                             Recipe, ShoppingCart, Tag)
 from users.models import Subscription
@@ -261,14 +261,6 @@ class RecipeSerializer(ModelSerializer):
                 'The tags must be unique!'
             )
         return tags
-
-    def validate_cooking_time(self, value):
-        if value > MAX_COOK_TIME or value <= ZERO_VALUE:
-            raise ValidationError(
-                f'The cooking time must be greater than {ZERO_VALUE} and '
-                f'less than or equal to {MAX_COOK_TIME}'
-            )
-        return value
 
     def create_ingredients_amounts(self, ingredients, recipe):
         IngredientAmount.objects.bulk_create(
